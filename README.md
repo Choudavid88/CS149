@@ -1,4 +1,5 @@
-CS149
+King Jimmy!
 =====
 
-CS 149 repository for group members Ken, Jimmy, and David
+King Jimmy!
+
