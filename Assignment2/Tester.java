@@ -6,7 +6,7 @@ public class Tester {
 	public static void main(String[] args)
 	{	
 		FCFSScheduler fs = new FCFSScheduler();
-		fs.createProcess(26);
+		fs.createProcess(26); // let's make it 26!!!
 		
 		fs.run();
 	}

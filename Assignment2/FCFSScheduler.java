@@ -1,22 +1,22 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-//Testing for gggggggithubbbbbbbb
+
 
 public class FCFSScheduler extends Scheduler {
 	private double aveTurnAroundTime;
 	private double aveWaitingTime;
 	private double aveResponseTime;
+	private double totalTime;
 	public FCFSScheduler()
 	{
 		processQueue = new ArrayList<Process>(); 
 		processList = new ArrayList<Process>(); 
+		totalTime = 0;
 	}
 	@Override
 	public void run() {
 		
-		
-		///////////////////////////
 		for(Process p: processList)
 		{
 			processQueue.add(p);
@@ -34,24 +34,32 @@ public class FCFSScheduler extends Scheduler {
 			}
 			
 		}); //by jimmy NOT KEN
-		///////////////////////////////
 		printProcess();
 	}
 	//print the time chart
 	public void printProcess() // by jimmy again
 	{
-		/*System.out.println("Arrival Time and ExpectedRunTime for each process");
-		for(Process p : processQueue)
+		//the correction has been made here
+		//solution: create an instance variable called totalTime for keeping track the total it takes to run the processes
+		Process p = null;
+		int counter = 0;
+		while(processQueue != null && totalTime < 99)
 		{
-			System.out.println(p.getProcessId() + " " + p.getArrivalTime() + " " + p.getExpectedRunTime());
-		}*/ // for checking the order is correct base on the arrival time
-		for(Process p : processQueue)
-		{
-			float temp = (float) p.getExpectedRunTime();
-			while(temp > 0)
+			if(processQueue.get(0).getArrivalTime() < totalTime)
 			{
-				System.out.print(p.getProcessId());
-				temp--;
+				p = processQueue.remove(0);
+				float temp = (float) p.getExpectedRunTime();
+				while(temp > 0)
+				{
+					System.out.print(p.getProcessId());
+					temp--;
+					totalTime++;
+				}
+			} // if no process has arrived at this time, we just increment the totalTime and print a space
+			else
+			{
+				System.out.print(" "); //print a space indicate this quanta does nothing
+				totalTime++;
 			}
 		}
 		
