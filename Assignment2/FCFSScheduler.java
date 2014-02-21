@@ -43,7 +43,7 @@ public class FCFSScheduler extends Scheduler {
 		//solution: create an instance variable called totalTime for keeping track the total it takes to run the processes
 		Process p = null;
 		int counter = 0;
-		while(processQueue != null && totalTime < 99)
+		while(processQueue > 0 && totalTime < 99)
 		{
 			if(processQueue.get(0).getArrivalTime() <= totalTime) //it should be less than equal because the arrival time of process should parallel with total time slice. 
 			{
