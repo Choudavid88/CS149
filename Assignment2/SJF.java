@@ -8,6 +8,7 @@ public class SJF extends Scheduler {
 	ArrayList<Double> averageResponseTime = new ArrayList<Double>();	
 	ArrayList<Double> averageWaitTime = new ArrayList<Double>();
 	ArrayList<Double> averageTurnAround = new ArrayList<Double>();
+	ArrayList<Double> burstTime = new ArrayList<Double>();
 	ArrayList<Integer> throughput = new ArrayList<Integer>();
 
 	
@@ -47,45 +48,89 @@ public class SJF extends Scheduler {
 			
 		});
 		
+		Collections.sort(processQueue, new Comparator<Process>(){	
+			@Override
+			public int compare(Process o1, Process o2) {
+				if(o1.getArrivalTime() < o2.getArrivalTime())
+					return -1;
+				else if(o1.getArrivalTime() > o2.getArrivalTime())
+					return 1;
+				else
+					return 0;
+			}
+			
+		});
+		
+		
 		Process p = null;
 		
-		double currentPosition = 0, currentResponse = 0,currentAverage = 0, currentTotal = 0, cumBurstTime = 0;
+		double currentPosition = 0, currentWait = 0, currentResponse = 0,TAT = 0, currentTotal = 0, cumBurstTime = 0;
+		//System.out.printf("Process ID    ||    Run Time   ||   Arrival Time || Priority \n");
 		while(processQueue.size() > 0 && totalTime <= 99) 
-			if(processQueue.get(0).getExpectedRunTime() <= totalTime) {
+			if(processQueue.get(0).getArrivalTime() <= totalTime) {
 			p = processQueue.remove(0);
 			float temp = (float) p.getExpectedRunTime();
 			while(temp > 0) {
-				System.out.printf("%5c  %20.4f %16.4f %10d \n",p.getProcessId(),p.getExpectedRunTime(),p.getArrivalTime(),p.getPriority());
+				//System.out.printf("%5c  %20.4f %16.4f %10d \n",p.getProcessId(),p.getExpectedRunTime(),p.getArrivalTime(),p.getPriority());
+				System.out.print(p.getProcessId());
 				temp--;
 				totalTime++;
 			}
 			
 			
-			if (i > 1) {		
-				currentResponse = currentResponse + p.getExpectedRunTime();
-				currentTotal = currentTotal + currentResponse;
-				totalTurnAroundTime =cumBurstTime  + p.getExpectedRunTime() + currentTotal;
+			if (i > 1) {	
+					if(currentPosition < p.getExpectedRunTime()) {
+						currentPosition = p.getExpectedRunTime();
+						cumBurstTime =  p.getExpectedRunTime();
+					}
+					if (p.getArrivalTime() > currentPosition) {
+						currentPosition = p.getArrivalTime();
+						cumBurstTime = p.getArrivalTime();
+					}
+				//waiting is arrive to exectute ; TAT is arrive to finish
+					currentWait = currentPosition - p.getArrivalTime();
+					currentPosition = currentPosition + p.getExpectedRunTime();
+				
+				cumBurstTime = cumBurstTime + currentPosition + p.getExpectedRunTime();
+				//TAT = cumBurstTime - p.getArrivalTime();
+				TAT = currentWait + p.getExpectedRunTime();
+		//		System.out.println("CP" + currentPosition + " CW" + currentWait + " CBT" +cumBurstTime + " TAT" + TAT);
+		//		currentResponse = currentResponse + p.getExpectedRunTime();
+	//			System.out.println("cumBurstTime " + cumBurstTime);
+		//		System.out.println("current Wait " + currentWait);
+		//		currentTotal = currentTotal + currentResponse;
+			//	System.out.println("current TAT " + TAT);
+			//	totalTurnAroundTime =cumBurstTime  + p.getExpectedRunTime() + currentTotal;
+		//		totalTurnAroundTime =currentResponse  - p.getArrivalTime();
+		//		System.out.println("totalTurnAroundTime " + totalTurnAroundTime);
 				i++;
-				currentAverage = currentTotal / i;
-				averageResponseTime.add(currentAverage);
-				averageTurnAround.add(totalTurnAroundTime);
+			//	currentAverage = currentTotal / i;
+			//	averageResponseTime.add(currentAverage);
+				burstTime.add(p.getExpectedRunTime());
+				averageTurnAround.add(TAT);
 				throughput.add(i);
-				averageWaitTime.add(currentResponse);
+				averageWaitTime.add(currentWait);
 			}
 			else {
-				currentResponse = p.getExpectedRunTime();
+				//start with current position = 0,
 				currentPosition = p.getExpectedRunTime();
-				currentTotal = currentTotal + currentResponse;
-				cumBurstTime = p.getExpectedRunTime() + currentResponse + currentAverage;
-				currentResponse = currentPosition;
+				currentWait = p.getArrivalTime() - 0;
+				TAT =  p.getExpectedRunTime() - p.getArrivalTime();
+				cumBurstTime = p.getExpectedRunTime();
+//				currentResponse = currentResponse + p.getArrivalTime();
 				i++;
-				averageResponseTime.add(currentAverage);
-				averageTurnAround.add(cumBurstTime);
+				//wait time and response time are the same for nonpreemptive
+			//	System.out.println("current cumBurstTime " + cumBurstTime);
+			//	System.out.println("current Position " + currentPosition);
+			//	averageResponseTime.add(currentWait);
+				burstTime.add(p.getExpectedRunTime());
+				averageTurnAround.add(TAT);
 				throughput.add(i);
-				averageWaitTime.add(currentResponse);
+				averageWaitTime.add(currentWait);
 			}
 		}
 			else {
+				System.out.print(" ");
 				totalTime++;
 			}
 		
@@ -93,15 +138,26 @@ public class SJF extends Scheduler {
 	}
 	
 	public void calculateAverage() {
-		double average= 0, temp = 0, total = 0;
+		double temp_TAT = 0, average= 0, temp = 0, temp2 = 0,total = 0,average_total=0;
+		
 		for(int i = 0 ; i < averageTurnAround.size(); i++) {
-			temp = averageTurnAround.get(i);
-			total = total + temp;
+			temp_TAT = averageTurnAround.get(i);
+			total = total + temp_TAT;
 			average = total / i;
 			setaverageTAT(average);
 		}
-		System.out.printf("average response time is : %9.3f \n", averageResponseTime.get(averageResponseTime.size()-2));
-		System.out.printf("average waiting time is : %10.3f\n", averageResponseTime.get(averageResponseTime.size()-1));
+		for(int j = 0 ; j < averageWaitTime.size(); j++) {
+			temp = averageWaitTime.get(j);
+		//	System.out.println(temp);
+			temp2 = temp;
+			average_total = average_total + temp2;
+		//	System.out.println("total " + average_total);
+			average = average_total / j;
+			setAverageWait(average);
+		}
+		System.out.printf("\n The statistics for SJF are as follows : \n");
+		System.out.printf("average response time is : %9.3f \n", getAverageWait());
+		System.out.printf("average waiting time is : %10.3f\n", getAverageWait());
 		System.out.printf("average turnaround time is : %2.2f\n", getaverageTAT());
 		System.out.printf("throughput is :  %16d \n", throughput.get(throughput.size()-1));
 
@@ -112,6 +168,12 @@ public class SJF extends Scheduler {
 	}
 	public double getaverageTAT() {
 		return aveTurnAroundTime;
+	}	
+	public void setAverageWait(double aveWaitingTime) {
+		this.aveWaitingTime = aveWaitingTime;
+	}
+	public double getAverageWait() {
+		return aveWaitingTime;
 	}	
 	
 }
