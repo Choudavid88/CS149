@@ -7,7 +7,7 @@ public class Process {
 	private char processId;
 	private int priority;
 	private Random rand;
-	
+
 	public Process(char processId)
 	{
 		rand = new Random();
@@ -19,11 +19,14 @@ public class Process {
 	public double getArrivalTime() {
 		return arrivalTime;
 	}
-	
+
 	public double getExpectedRunTime() {
 		return expectedRunTime;
 	}
-	
+
+	public void updateExpectedRunTime(float time){
+		expectedRunTime = time;
+	}
 	public char getProcessId() {
 		return processId;
 	}
@@ -33,5 +36,5 @@ public class Process {
 	public int getPriority() {
 		return priority;
 	}
-	
+
 }
