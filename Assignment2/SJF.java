@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class SJF extends Scheduler {
-	private double totalTurnAroundTime, aveTurnAroundTime, aveWaitingTime, totalWaitTime, aveResponseTime, totalTime;
+	private double totalTurnAroundTime, Throughput, aveTurnAroundTime, aveWaitingTime, totalWaitTime, aveResponseTime, totalTime;
 	ArrayList<Double> averageResponseTime = new ArrayList<Double>();	
 	ArrayList<Double> averageWaitTime = new ArrayList<Double>();
 	ArrayList<Double> averageTurnAround = new ArrayList<Double>();
@@ -66,7 +66,7 @@ public class SJF extends Scheduler {
 		
 		double currentPosition = 0, currentWait = 0, currentResponse = 0,TAT = 0, currentTotal = 0, cumBurstTime = 0;
 		//System.out.printf("Process ID    ||    Run Time   ||   Arrival Time || Priority \n");
-		while(processQueue.size() > 0 && totalTime <= 99) 
+		while(processQueue.size() > 0 && totalTime <= 99) {
 			if(processQueue.get(0).getArrivalTime() <= totalTime) {
 			p = processQueue.remove(0);
 			float temp = (float) p.getExpectedRunTime();
@@ -133,7 +133,7 @@ public class SJF extends Scheduler {
 				System.out.print(" ");
 				totalTime++;
 			}
-		
+		}
 		calculateAverage();
 	}
 	
@@ -155,11 +155,20 @@ public class SJF extends Scheduler {
 			average = average_total / j;
 			setAverageWait(average);
 		}
+
+		double tempBurst = 0, tempTotal = 0, throughput;
+		for(int k = 0 ; k < burstTime.size(); k++) {
+			tempBurst = burstTime.get(k);
+			tempTotal = tempBurst + tempTotal;
+			throughput = k/tempTotal;
+			setThroughput(throughput);
+		}
+		
 		System.out.printf("\n The statistics for SJF are as follows : \n");
 		System.out.printf("average response time is : %9.3f \n", getAverageWait());
 		System.out.printf("average waiting time is : %10.3f\n", getAverageWait());
-		System.out.printf("average turnaround time is : %2.2f\n", getaverageTAT());
-		System.out.printf("throughput is :  %16d \n", throughput.get(throughput.size()-1));
+		System.out.printf("average turnaround time is : %7.2f\n", getaverageTAT());
+		System.out.printf("throughput is :  %21f \n", getThroughput());
 
 	}
 	
@@ -168,6 +177,12 @@ public class SJF extends Scheduler {
 	}
 	public double getaverageTAT() {
 		return aveTurnAroundTime;
+	}	
+	public void setThroughput(double Throughput) {
+		this.Throughput = Throughput;
+	}
+	public double getThroughput() {
+		return Throughput;
 	}	
 	public void setAverageWait(double aveWaitingTime) {
 		this.aveWaitingTime = aveWaitingTime;
