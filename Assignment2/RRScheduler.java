@@ -155,12 +155,11 @@ public class RRScheduler extends Scheduler {
 			
 			for(int i = lastOfIndex -1 ; i > 0 && !found ; i--){
 				if(p.getProcessId() == output.get(i)){
-					double turnAroundTime = i - p.getArrivalTime();
+					double turnAroundTime = (i - p.getArrivalTime()) + 1;
 					double waitingTime = turnAroundTime - p.getExpectedRunTime();
 					turnAroundTimeList.add(turnAroundTime);
 					waitingTimeList.add(waitingTime);
-					found = true;
-					
+					found = true;	
 				}
 			}
 		}
@@ -177,12 +176,12 @@ public class RRScheduler extends Scheduler {
 			}
 		}
 		aveTurnAroundTime = aveCalculation(this.turnAroundTimeList);
-		System.out.println("Average turnaround time: " + this.aveTurnAroundTime);
+		System.out.println("Average turnaround time is " + this.aveTurnAroundTime);
 		aveWaitingTime = aveCalculation(this.waitingTimeList);
-		System.out.println("Average waiting time: " + this.aveWaitingTime);
+		System.out.println("Average waiting time is " + this.aveWaitingTime);
 		aveResponseTime = aveCalculation(this.responseTimeList);
-		System.out.println("Average response time: " + this.aveResponseTime);
-		System.out.println("Throughput: " + processList.size()/totalTime);
+		System.out.println("Average response time is " + this.aveResponseTime);
+		System.out.println("Throughput is " + processList.size()/totalTime);
 	}
 	public double aveCalculation(ArrayList<Double> list){
 		double total = 0;
