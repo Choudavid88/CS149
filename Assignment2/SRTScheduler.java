@@ -37,7 +37,8 @@ public class SRTScheduler extends Scheduler {
 
 		}); //by jimmy NOT KEN
 		for(Process e: processQueue)
-			System.out.println(e.getProcessId() +" "+ e.getArrivalTime()+" "+ e.getExpectedRunTime());
+				System.out.println(e.getProcessId());
+			//System.out.println(e.getProcessId() +" "+ e.getArrivalTime()+" "+ e.getExpectedRunTime());
 
 		printProcess();
 	}
@@ -80,11 +81,13 @@ public class SRTScheduler extends Scheduler {
 					if(processQueue.size() > 0 && processQueue.get(0).getArrivalTime() <= totalTime){
 						if(processQueue.get(0).getExpectedRunTime() < temp){
 							p.updateExpectedRunTime(temp);
+							p.setStarted(true);
 							waitingQueue.add(p);
 							p = processQueue.remove(0);
 							temp = (float) p.getExpectedRunTime();
 						}
 						else{
+							p.setStarted(false);
 							waitingQueue.add(processQueue.get(0));
 							processQueue.remove(0);
 						}
@@ -101,10 +104,16 @@ public class SRTScheduler extends Scheduler {
 			}
 		}
 		
-		System.out.println(counter);
-		for(Process e: waitingQueue)
-			System.out.println(e.getProcessId() +" "+ e.getExpectedRunTime() + " " + e.getArrivalTime());
-
+		//System.out.println(counter);
+		for(Process e: waitingQueue) {
+			if(e.getStarted() == true) {
+				float temp = (float) e.getExpectedRunTime();
+				while(temp > 0) {
+				remainingQueue.add(e);
+				System.out.print(e.getProcessId());
+				temp--;
+				}
+			}
 	}
 	
 	public void sort(ArrayList<Process> p ){

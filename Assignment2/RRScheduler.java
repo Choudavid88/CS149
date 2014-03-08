@@ -8,13 +8,21 @@ public class RRScheduler extends Scheduler {
 	private double aveWaitingTime;
 	private double aveResponseTime;
 	private double totalTime;
+	private ArrayList<Double> turnAroundTimeList;
+	private ArrayList<Double> waitingTimeList;
+	private ArrayList<Double> responseTimeList;
 	private ArrayList<Process> waitingQueue;
-	private int quantum = 1;
+	private ArrayList<Character> output;
+	
 	public RRScheduler()
 	{
 		processQueue = new ArrayList<Process>(); 
 		processList = new ArrayList<Process>();
 		waitingQueue = new ArrayList<Process>();
+		turnAroundTimeList= new ArrayList<Double>();
+		waitingTimeList= new ArrayList<Double>();
+		responseTimeList = new ArrayList<Double>();
+		output = new ArrayList<Character>();
 		totalTime = 0;
 	}
 	@Override
@@ -37,10 +45,12 @@ public class RRScheduler extends Scheduler {
 			}
 
 		}); //by jimmy NOT KEN
-		for(Process e: processQueue)
-			System.out.println(e.getProcessId() +" "+ e.getArrivalTime()+" "+ e.getExpectedRunTime());
-
+		/*for(Process e: processQueue)
+			System.out.println(e.getProcessId() +" Arr "+ e.getArrivalTime()+" RUN "+ e.getExpectedRunTime());
+		*/
 		printProcess();
+		calculate();
+		
 	}
 	//print the time chart
 	public void printProcess() // by jimmy again
@@ -58,6 +68,7 @@ public class RRScheduler extends Scheduler {
 				p = waitingQueue.remove(0);				
 				float temp = (float) p.getExpectedRunTime();
 				System.out.print(p.getProcessId());
+				output.add(p.getProcessId());
 				temp--;
 				totalTime++;
 				if(temp > 0){
@@ -69,6 +80,7 @@ public class RRScheduler extends Scheduler {
 				p = waitingQueue.remove(0);				
 				float temp = (float) p.getExpectedRunTime();
 				System.out.print(p.getProcessId());
+				output.add(p.getProcessId());
 				temp--;
 				totalTime++;
 				if(temp > 0){
@@ -79,15 +91,24 @@ public class RRScheduler extends Scheduler {
 			else
 			{
 				System.out.print(" "); //print a space indicate this quanta does nothing
+				output.add(' ');
 				totalTime++;
-				counter++;
+			}
+		}
+		while (waitingQueue.size() > 0){
+			p = waitingQueue.remove(0);				
+			float temp = (float) p.getExpectedRunTime();
+			System.out.print(p.getProcessId());
+			output.add(p.getProcessId());
+			temp--;
+			totalTime++;
+			if(temp > 0){
+				p.updateExpectedRunTime(temp);
+				waitingQueue.add(p);
 			}
 		}
 		
-		System.out.println(counter);
-		for(Process e: waitingQueue)
-			System.out.println(e.getProcessId() +" "+ e.getExpectedRunTime() + " " + e.getArrivalTime());
-
+		System.out.println("");
 	}
 	
 	public void sort(ArrayList<Process> p ){
@@ -112,5 +133,62 @@ public class RRScheduler extends Scheduler {
 		}
 	}
 	
+	
+	public void calculate(){
+		int lastOfIndex = output.size();
+		Collections.sort(processList, new Comparator<Process>(){
+
+			@Override
+			public int compare(Process o1, Process o2) {
+				if(o1.getArrivalTime() < o2.getArrivalTime())
+					return -1;
+				else if(o1.getArrivalTime() > o2.getArrivalTime())
+					return 1;
+				else
+					return 0;
+			}
+
+		});
+		for(Process p : processList){
+			
+			boolean found = false;
+			
+			for(int i = lastOfIndex -1 ; i > 0 && !found ; i--){
+				if(p.getProcessId() == output.get(i)){
+					double turnAroundTime = (i - p.getArrivalTime()) + 1;
+					double waitingTime = turnAroundTime - p.getExpectedRunTime();
+					turnAroundTimeList.add(turnAroundTime);
+					waitingTimeList.add(waitingTime);
+					found = true;	
+				}
+			}
+		}
+		
+		for(Process p : processList){
+			boolean found = false;
+			for(int i = 0; i < output.size() && !found; i++){
+				if(p.getProcessId() == output.get(i))
+				{
+					double responseTime = i - p.getArrivalTime();
+					responseTimeList.add(responseTime);
+					found = true;
+				}
+			}
+		}
+		aveTurnAroundTime = aveCalculation(this.turnAroundTimeList);
+		System.out.println("Average turnaround time is " + this.aveTurnAroundTime);
+		aveWaitingTime = aveCalculation(this.waitingTimeList);
+		System.out.println("Average waiting time is " + this.aveWaitingTime);
+		aveResponseTime = aveCalculation(this.responseTimeList);
+		System.out.println("Average response time is " + this.aveResponseTime);
+		System.out.println("Throughput is " + processList.size()/totalTime);
+	}
+	public double aveCalculation(ArrayList<Double> list){
+		double total = 0;
+		for (int i = 0; i < list.size(); i++){
+			total += list.get(i);
+		}
+		return total/list.size();
+	}
 
 }
