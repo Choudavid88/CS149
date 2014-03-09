@@ -8,7 +8,7 @@
 #include <string.h>
 
 #define LINE_LENGTH 15
-#define STUDENT_COUNT 15
+#define CUSTOMER_COUNT 15
 
 #define SELL_DURATION 60
 
@@ -23,12 +23,12 @@ struct itimerval ticketTimer;
 time_t startTime;
 
 int in = 0, out = 0;
-int meetingId = 0;
+//int meetingId = 0;
 
 int arrivalsCount = 0;
 int waitCount = 0;
 int leavesCount = 0;
-int meetingsCount = 0;
+//int meetingsCount = 0;
 
 int firstPrint = 1;
 
@@ -53,18 +53,14 @@ void print(char *event)
     pthread_mutex_lock(&printMutex);
     
     if (firstPrint) {
-        printf("TIME | MEETING | WAITING     | EVENT\n");
+        printf("TIME  | WAITING     | EVENT\n");
         firstPrint = 0;
     }
     
     printf("%1d:%02d | ", min, sec);
     
-    if (meetingId > 0) {
-        printf("%5d   |", meetingId);
-    }
-    else {
         printf("        |");
-    }
+    
     
     pthread_mutex_lock(&ticketMutex);
     
@@ -86,9 +82,9 @@ void print(char *event)
     pthread_mutex_unlock(&printMutex);
 }
 
-void studentArrives(char *id)
+void customerArrives(char *id)
 {
-    printf("studentArrives is %s \n", *&id);
+    printf("customerArrives is %s \n", *&id);
     char event[80];
     arrivalsCount++;
     
@@ -117,10 +113,10 @@ void studentArrives(char *id)
 void *customer(void *param)
 {
     char *id = *&param;
-    printf("***id is %s \n", *&id);
+  //  printf("***id is %s \n", *&id);
     sleep(rand()%SELL_DURATION);
-    printf("!!!id is %s \n", *&id);
-    studentArrives(id);
+    //printf("!!!id is %s \n", *&id);
+    customerArrives(id);
     
     return NULL;
 }
@@ -132,9 +128,7 @@ void sellHighTickets()
 {
     char event[80];
     if (!timesUp) {
-        if(meetingId == 0) {
-            return;
-        }
+        
         // Wait in queue
         sem_wait(&lineWait);
         
@@ -142,7 +136,7 @@ void sellHighTickets()
         pthread_mutex_lock(&ticketMutex);
         
         // Critical region:
-        meetingId = line[out];
+      //  meetingId = line[out];
         out = (out+1)%LINE_LENGTH;
         waitCount--;
         
@@ -155,7 +149,6 @@ void sellHighTickets()
         
         // Meet with the customer.
         sleep(1 + rand()%2);
-        meetingsCount++;
         
       //  sprintf(event, "High ticket booth finishes with customer");
         //print(event);
@@ -207,7 +200,7 @@ int main(int argc, char *argv[])
         char num = (char)(((int)'0')+i);
         strcat(TypeContent, "H");
         strcat(TypeContent, &num);
-        printf("TypeContent num is %s", *&TypeContent);
+      //  printf("TypeContent num is %s", *&TypeContent);
         pthread_t customerThreadId;
         pthread_attr_t customerAttr;
         pthread_attr_init(&customerAttr);
@@ -219,7 +212,7 @@ int main(int argc, char *argv[])
 
     pthread_join(highTicket, NULL);
     
-    meetingId = 0;
+   // meetingId = 0;
     while (waitCount-- > 0) {
         int customerId = line[out];
         out = (out+1)%LINE_LENGTH;
@@ -233,7 +226,7 @@ int main(int argc, char *argv[])
     // Final statistics.
     printf("\n");
     printf("%5d customers arrived\n", arrivalsCount);
-    printf("%5d customers met with representatives\n", meetingsCount);
+    //printf("%5d customers met with representatives\n", meetingsCount);
     printf("%5d customers left without purchasing tickets\n", leavesCount);
     
     return 0;
