@@ -180,8 +180,13 @@ void timerHandler(int signal)
 
 int main(int argc, char *argv[])
 {
+    
     char *TypeContent = (char *)malloc(1256);
     int ticketId = 0;
+    int input_Number;
+    printf("Please enter number of customers");
+    scanf("%d", &input_Number);
+    
     pthread_mutex_init(&lineMutex, NULL);
     pthread_mutex_init(&ticketMutex, NULL);
     pthread_mutex_init(&printMutex, NULL);
@@ -196,7 +201,7 @@ int main(int argc, char *argv[])
     
     int i=0;
 
-    for (i = 0; i < 5; i++) { //input number
+    for (i = 0; i < input_Number; i++) {
         char num = (char)(((int)'0')+i);
         strcat(TypeContent, "H");
         strcat(TypeContent, &num);
